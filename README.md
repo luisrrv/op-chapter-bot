@@ -1,8 +1,8 @@
 # 🏴‍☠️ op-chapter-bot
 
-Every week, the official One Piece Discord server posts a new chapter release announcement. I have a bot in my own Discord server that watches that channel and copies every new chapter message into one of my channels. The problem is I don't check Discord that often — but I'm always on Slack.
+Every week, the official One Piece Discord server posts a new chapter release announcement. Since me and my friends aren't on Discord much, I set up a bot in my own Discord server that copies every new chapter message from the official channel into one of mine — and then built this app to take it a step further.
 
-So I built this to close the loop. It monitors my Discord channel for those copied chapter announcements and instantly forwards them to my Slack, along with a random hype message in Spanish/Spanglish because why not.
+It monitors my Discord channel for those copied chapter announcements and forwards them to a Slack channel where me and my friends actually hang out. Now we get notified the moment a new chapter drops and can discuss it right there. It also throws in a random hype message in Spanish/Spanglish because that's how we roll.
 
 ## How it works
 
@@ -15,7 +15,7 @@ My Discord server (bot copies the message)
         │
         ▼
    ┌──────────┐    chapter detected?    ┌───────────┐
-   │  GitHub   │───────────────────────▶│ My Slack   │
+   │  GitHub   │───────────────────────▶│ Our Slack  │
    │  Actions  │   🔥 random hype msg   │  channel   │
    │  (cron)   │   + release details     └───────────┘
    └──────────┘
@@ -24,7 +24,7 @@ My Discord server (bot copies the message)
    Supabase (last message ID tracking)
 ```
 
-A GitHub Actions cron job runs every hour during the typical release window (Friday–Saturday JST). It logs into Discord, grabs new messages from my channel, and checks if any match the chapter release pattern. When one does, it picks a random hype message, tacks on the release details, and posts it to my Slack. Supabase keeps track of the last processed message ID so nothing gets double-posted.
+A GitHub Actions cron job runs every hour during the typical release window (Friday–Saturday JST). It logs into Discord, grabs new messages from my channel, and checks if any match the chapter release pattern. When one does, it picks a random hype message, tacks on the release details, and posts it to our Slack. Supabase keeps track of the last processed message ID so nothing gets double-posted.
 
 ## Setup
 
