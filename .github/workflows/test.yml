@@ -20,8 +20,8 @@ jobs:
 
       - name: Echo Environment Variables
         run: |
-            echo "NEXT_PUBLIC_SUPABASE_URL: $NEXT_PUBLIC_SUPABASE_URL"
-            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY: $NEXT_PUBLIC_SUPABASE_ANON_KEY"
+            echo "SUPABASE_URL: $SUPABASE_URL"
+            echo "SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY"
             echo "DISCORD_BOT_TOKEN: $DISCORD_BOT_TOKEN"
             echo "WEBHOOK_URL: $WEBHOOK_URL"
             echo "CHANNEL_ID: $CHANNEL_ID"
@@ -30,8 +30,8 @@ jobs:
 
       - name: Run script
         env:
-            NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}  
-            NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}  
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}  
+            SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}  
             DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
             WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
             CHANNEL_ID: ${{ secrets.CHANNEL_ID }} 
