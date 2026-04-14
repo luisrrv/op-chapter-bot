@@ -1,0 +1,17 @@
+{
+  "name": "op-chapter-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Monitors a Discord channel for One Piece chapter releases and forwards hype notifications to Slack.",
+  "scripts": {
+    "start": "node discord_bot.mjs",
+    "test": "echo \"No tests configured yet\""
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.0.4",
+    "@supabase/supabase-js": "^2.49.1",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  }
+}
