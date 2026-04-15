@@ -2,11 +2,8 @@ name: Script
 
 on:
   schedule:
-    # Thursday 15:00–23:00 UTC (Friday 00:00–08:00 JST)
     - cron: '0 15-23 * * 4'
-    # Full Friday UTC (Friday 09:00 JST → Saturday 08:00 JST)
     - cron: '0 * * * 5'
-    # Saturday 00:00–14:00 UTC (Saturday 09:00–23:00 JST)
     - cron: '0 0-14 * * 6'
 
 jobs:
@@ -15,33 +12,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Echo Environment Variables
-        run: |
-            echo "SUPABASE_URL: $SUPABASE_URL"
-            echo "SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY"
-            echo "DISCORD_BOT_TOKEN: $DISCORD_BOT_TOKEN"
-            echo "WEBHOOK_URL: $WEBHOOK_URL"
-            echo "CHANNEL_ID: $CHANNEL_ID"
-            echo "SLACK_OAUTH_TOKEN: $SLACK_OAUTH_TOKEN"
-            echo "SLACK_CHANNEL_ID: $SLACK_CHANNEL_ID"
-
       - name: Run script
         env:
-            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}  
-            SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}  
-            DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-            WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-            CHANNEL_ID: ${{ secrets.CHANNEL_ID }} 
-            SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }} 
-            SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }} 
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node discord_bot.mjs
