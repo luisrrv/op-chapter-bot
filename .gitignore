@@ -1,0 +1,17 @@
+node_modules
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea
+.vscode
+
+# Logs
+*.log
+npm-debug.log*
+
+# Optional npm cache
+.npm
