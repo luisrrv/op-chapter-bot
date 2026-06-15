@@ -12,8 +12,8 @@ const DISCORD_CHANNEL_ID = process.env.CHANNEL_ID;
 const SLACK_TOKEN = process.env.SLACK_OAUTH_TOKEN;
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
 
-const CHAPTER_RELEASE_PATTERN =
-  /(?=.*\bchapter\b)(?=.*\brelease\b)(?=.*\b1\d{3}\b)/i;
+const CHAPTER_RELEASE_PATTERN = // TBC server format
+  /(?=[\s\S]*one piece\s*-\s*chapter\s+1\d{3})(?=[\s\S]*new one piece chapter released)/i;
 
 const TEST_TRIGGER = "this is a test";
 
@@ -68,7 +68,13 @@ async function postToSlack(text) {
 
 // --- Discord ---
 
-const discord = new Client({ intents: [GatewayIntentBits.Guilds] });
+const discord = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
 
 async function processNewMessages() {
   const channel = discord.channels.cache.get(DISCORD_CHANNEL_ID);
@@ -89,11 +95,34 @@ async function processNewMessages() {
 
   for (const msg of messages.values()) {
     const content = msg.content.toLowerCase();
+	  const searchText = getMessageSearchText(msg);
 
-    if (CHAPTER_RELEASE_PATTERN.test(content)) {
+    if (CHAPTER_RELEASE_PATTERN.test(searchText)) {
       console.log("[discord] New chapter release detected.");
-      const sanitized = msg.content.replace(/@everyone/g, "");
-      await postToSlack(`<!channel> ${generateHype()}\n\n${sanitized}`);
+
+      const title = getChapterTitle(searchText);
+      const description = "New One Piece Chapter Released!";
+      const chapterNumber = getChapterNumber(title);
+      const breakMessage = getBreakMessage(searchText);
+      const chapterUrl = chapterNumber
+        ? `https://tcbscansonepiecechapter.com/one-piece-chapter-${chapterNumber}/`
+        : null;
+
+      const slackMessage = [
+        `<!channel> ${generateHype()}`,
+        "",
+        "",
+        `*${title}*`,
+        "",
+        breakMessage,
+        "",
+        "",
+        chapterUrl ? `<${chapterUrl}|Read Chapter>` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      await postToSlack(slackMessage);
     } else if (content.includes(TEST_TRIGGER)) {
       console.log("[discord] Test trigger detected.");
       await postToSlack("<!channel>\n\nSistema funcionando correctamente. 🗿");
@@ -103,10 +132,70 @@ async function processNewMessages() {
   await storeMessageId(messages.first().id);
 }
 
+function getChapterTitle(text) {
+  const match = text.match(/one piece\s*-\s*chapter\s+1\d{3}/i);
+  return match ? match[0] : "New One Piece Chapter Released";
+}
+
+function getChapterNumber(text) {
+  const match = text.match(/chapter\s+(1\d{3})/i);
+  return match?.[1] ?? null;
+}
+
+function getMessageSearchText(msg) {
+  const content = msg.content ?? "";
+
+  const embedText = msg.embeds
+    .map((embed) =>
+      [
+        embed.title,
+        embed.description,
+        embed.author?.name,
+        embed.footer?.text,
+        ...(embed.fields?.flatMap((field) => [field.name, field.value]) ?? []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+    )
+    .join(" ");
+
+  return `${content} ${embedText}`;
+}
+
+function getBreakMessage(text) {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const breakLine = lines.find(
+    (line) =>
+      /break/i.test(line) &&
+      !/no\s+break/i.test(line)
+  );
+
+  return breakLine ?? null;
+}
+
+function getButtonUrl(msg, label) {
+  for (const row of msg.components ?? []) {
+    for (const component of row.components ?? []) {
+      if (
+        component.label?.toLowerCase() === label.toLowerCase() &&
+        component.url
+      ) {
+        return component.url;
+      }
+    }
+  }
+
+  return null;
+}
+
 // --- Entry point ---
 
 async function main() {
-  discord.once("ready", async () => {
+    discord.once("clientReady", async () => {
     console.log(`[discord] Logged in as ${discord.user.tag}`);
 
     try {
