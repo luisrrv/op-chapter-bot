@@ -2,9 +2,9 @@ name: Script
 
 on:
   schedule:
-    - cron: '0 15-23 * * 4'
-    - cron: '0 * * * 5'
-    - cron: '0 0-14 * * 6'
+    # Hourly through Monday JST (UTC+9), when new chapters are announced.
+    - cron: '0 15-23 * * 0'  # Mon 00:00-08:00 JST
+    - cron: '0 0-14 * * 1'   # Mon 09:00-23:00 JST
 
 jobs:
   run-script:
@@ -25,7 +25,7 @@ jobs:
       - name: Run script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}

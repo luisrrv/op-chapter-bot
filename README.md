@@ -1,17 +1,17 @@
 # 🏴‍☠️ op-chapter-bot
 
-Every week, the official One Piece Discord server posts a new chapter release announcement. Since me and my friends aren't on Discord much, I set up a bot in my own Discord server that copies every new chapter message from the official channel into one of mine — and then built this app to take it a step further.
+Every week, the r/OnePiece Discord server posts a chapter release announcement in its #announcements channel. Since me and my friends aren't on Discord much, I follow that channel from my own Discord server so every announcement lands in one of mine — and then built this app to take it a step further.
 
 It monitors my Discord channel for those copied chapter announcements and forwards them to a Slack channel where me and my friends actually hang out. Now we get notified the moment a new chapter drops and can discuss it right there. It also throws in a random hype message in Spanish because that's how we roll.
 
 ## How it works
 
 ```
-Official OP Discord
-  "Chapter 1XXX released!"
+r/OnePiece Discord #announcements
+  "Chapter 1XXX release @everyone"
         │
         ▼
-My Discord server (bot copies the message)
+My Discord server (followed channel)
         │
         ▼
    ┌──────────┐    chapter detected?    ┌───────────┐
@@ -24,7 +24,7 @@ My Discord server (bot copies the message)
    Supabase (last message ID tracking)
 ```
 
-A GitHub Actions cron job runs every hour during the typical release window. It logs into Discord, grabs new messages from my channel, and checks if any match the chapter release pattern. When one does, it picks a random hype message, tacks on the release details, and posts it to our Slack. A Supabase table keeps track of the last processed message ID so nothing gets double-posted.
+A GitHub Actions cron job runs every hour on Mondays (JST), when new chapters come out. It logs into Discord, grabs new messages from my channel, and checks if any match the chapter release pattern. When one does, it picks a random hype message, tacks on the chapter number, any "break next week" notice, and the official MangaPlus link, and posts it to our Slack. A Supabase table keeps track of the last processed message ID so nothing gets double-posted.
 
 ## Setup
 
@@ -44,7 +44,7 @@ The app requires credentials for Discord, Slack, and Supabase. Add them as envir
 
 Two workflows:
 
-- **`script.yml`** — Scheduled cron that runs during the Fri–Sat JST release window
+- **`script.yml`** — Scheduled cron that runs hourly on Mondays JST
 - **`test.yml`** — Manual trigger for testing
 
 ### 4. Run locally

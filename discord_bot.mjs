@@ -12,8 +12,10 @@ const DISCORD_CHANNEL_ID = process.env.CHANNEL_ID;
 const SLACK_TOKEN = process.env.SLACK_OAUTH_TOKEN;
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
 
-const CHAPTER_RELEASE_PATTERN = // TBC server format
-  /(?=[\s\S]*one piece\s*-\s*chapter\s+1\d{3})(?=[\s\S]*new one piece chapter released)/i;
+// r/OnePiece #announcements format, e.g.
+//   "Chapter 1194 release @everyone" + MangaPlus link + "BREAK NEXT WEEK"
+const CHAPTER_RELEASE_PATTERN = /chapter\s+(\d{3,4})\s+release/i;
+const MANGAPLUS_URL_PATTERN = /https?:\/\/mangaplus\.shueisha\.co\.jp\/viewer\/\d+/i;
 
 const TEST_TRIGGER = "this is a test";
 
@@ -41,6 +43,14 @@ const HYPE_MESSAGES = [
 ];
 
 const HYPE_EMOJIS = ["🚬", "🔥", "🗿", "🤫"];
+
+// Shown after the MangaPlus link.
+const SCAN_QUIPS = [
+  "…o búscate un scan por ahí, ya sabes cómo es 🏴‍☠️",
+  "…o si eres pirata de corazón, ya sabes dónde encontrar el scan 🏴‍☠️",
+  "…o haz como Luffy y consígue un scan a tu manera 🏴‍☠️",
+  "…o ponte el sombrero de paja y búsca un scan tú mismo 🏴‍☠️",
+]
 
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -100,13 +110,13 @@ async function processNewMessages() {
     if (CHAPTER_RELEASE_PATTERN.test(searchText)) {
       console.log("[discord] New chapter release detected.");
 
-      const title = getChapterTitle(searchText);
-      const description = "New One Piece Chapter Released!";
-      const chapterNumber = getChapterNumber(title);
+      const chapterNumber = getChapterNumber(searchText);
+      const title = chapterNumber
+        ? `One Piece - Chapter ${chapterNumber}`
+        : "New One Piece Chapter Released";
       const breakMessage = getBreakMessage(searchText);
-      const chapterUrl = chapterNumber
-        ? `https://tcbscansonepiecechapter.com/one-piece-chapter-${chapterNumber}/`
-        : null;
+      // Official, free chapter link on MangaPlus, taken from the announcement itself.
+      const chapterUrl = searchText.match(MANGAPLUS_URL_PATTERN)?.[0] ?? null;
 
       const slackMessage = [
         `<!channel> ${generateHype()}`,
@@ -118,6 +128,7 @@ async function processNewMessages() {
         "",
         "",
         chapterUrl ? `<${chapterUrl}|Read Chapter>` : null,
+        chapterUrl ? `_${pickRandom(SCAN_QUIPS)}_` : null,
       ]
         .filter(Boolean)
         .join("\n");
@@ -132,14 +143,8 @@ async function processNewMessages() {
   await storeMessageId(messages.first().id);
 }
 
-function getChapterTitle(text) {
-  const match = text.match(/one piece\s*-\s*chapter\s+1\d{3}/i);
-  return match ? match[0] : "New One Piece Chapter Released";
-}
-
 function getChapterNumber(text) {
-  const match = text.match(/chapter\s+(1\d{3})/i);
-  return match?.[1] ?? null;
+  return text.match(CHAPTER_RELEASE_PATTERN)?.[1] ?? null;
 }
 
 function getMessageSearchText(msg) {
@@ -174,7 +179,8 @@ function getBreakMessage(text) {
       !/no\s+break/i.test(line)
   );
 
-  return breakLine ?? null;
+  // Discord uses **bold**; Slack uses *bold*.
+  return breakLine ? `*${breakLine.replace(/[*_~`>]/g, "").trim()}*` : null;
 }
 
 function getButtonUrl(msg, label) {
