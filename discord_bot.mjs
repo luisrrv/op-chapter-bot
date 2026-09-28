@@ -103,7 +103,13 @@ async function processNewMessages() {
     return;
   }
 
-  for (const msg of messages.values()) {
+  // discord.js returns newest first; post oldest first so a backlog
+  // lands in Slack in chapter order.
+  const ordered = [...messages.values()].sort(
+    (a, b) => a.createdTimestamp - b.createdTimestamp
+  );
+
+  for (const msg of ordered) {
     const content = msg.content.toLowerCase();
 	  const searchText = getMessageSearchText(msg);
 
