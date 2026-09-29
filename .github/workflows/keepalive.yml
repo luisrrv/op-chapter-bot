@@ -1,0 +1,25 @@
+name: Keepalive
+
+# GitHub disables scheduled workflows after 60 days without repo activity.
+# Re-enabling them through the API once a month keeps the Monday schedule
+# (and this workflow) running without needing dummy commits.
+on:
+  schedule:
+    - cron: '0 3 1 * *'  # 1st of every month, 12:00 JST
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-enable scheduled workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh workflow enable script.yml
+          gh workflow enable keepalive.yml
+          gh workflow list --all

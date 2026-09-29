@@ -46,6 +46,7 @@ Two workflows:
 
 - **`script.yml`** — Scheduled cron that runs hourly on Mondays JST
 - **`test.yml`** — Manual trigger for testing
+- **`keepalive.yml`** — Monthly job that re-enables the scheduled workflows, so GitHub's 60-day inactivity rule doesn't pause the bot
 
 ### 4. Run locally
 
@@ -58,7 +59,8 @@ node discord_bot.mjs
 ```
 ├── .github/workflows/
 │   ├── script.yml
-│   └── test.yml
+│   ├── test.yml
+│   └── keepalive.yml
 ├── discord_bot.mjs
 ├── script_requests.js
 ├── package.json
